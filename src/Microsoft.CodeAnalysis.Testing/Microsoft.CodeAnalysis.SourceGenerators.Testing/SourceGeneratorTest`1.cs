@@ -22,26 +22,14 @@ namespace Microsoft.CodeAnalysis.Testing
     public abstract class SourceGeneratorTest<TVerifier> : AnalyzerTest<TVerifier>
         where TVerifier : IVerifier, new()
     {
-        /// <summary>
-        /// Sets the expected output source file for source generator testing.
-        /// </summary>
-        /// <seealso cref="FixedState"/>
-        public string FixedCode
-        {
-            set
-            {
-                if (value != null)
-                {
-                    FixedState.Sources.Add(value);
-                }
-            }
-        }
-
         public SolutionState FixedState { get; }
+
+        public SourceFileCollection GeneratedSources { get; }
 
         protected SourceGeneratorTest()
         {
             FixedState = new SolutionState(DefaultTestProjectName, Language, DefaultFilePathPrefix, DefaultFileExt);
+            GeneratedSources = new SourceFileCollection();
 
             // Disable test behaviors that don't make sense for source generator scenarios
             TestBehaviors |= TestBehaviors.SkipSuppressionCheck | TestBehaviors.SkipGeneratedCodeCheck;
@@ -67,6 +55,7 @@ namespace Microsoft.CodeAnalysis.Testing
 
             var rawTestState = TestState.WithInheritedValuesApplied(null, fixableDiagnostics);
             var rawFixedState = FixedState.WithInheritedValuesApplied(rawTestState, fixableDiagnostics);
+            rawFixedState.Sources.AddRange(GeneratedSources);
 
             var testState = rawTestState.WithProcessedMarkup(MarkupOptions, defaultDiagnostic, supportedDiagnostics, fixableDiagnostics, DefaultFilePath);
             var fixedState = rawFixedState.WithProcessedMarkup(MarkupOptions, defaultDiagnostic, supportedDiagnostics, fixableDiagnostics, DefaultFilePath);
