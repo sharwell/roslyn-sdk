@@ -22,9 +22,12 @@ namespace Microsoft.CodeAnalysis.Testing
     public abstract class SourceGeneratorTest<TVerifier> : AnalyzerTest<TVerifier>
         where TVerifier : IVerifier, new()
     {
-        public SolutionState FixedState { get; }
-
+        /// <summary>
+        /// Gets a collection of source files for source generator testing.
+        /// </summary>
         public SourceFileCollection GeneratedSources { get; }
+
+        public SolutionState FixedState { get; }
 
         protected SourceGeneratorTest()
         {

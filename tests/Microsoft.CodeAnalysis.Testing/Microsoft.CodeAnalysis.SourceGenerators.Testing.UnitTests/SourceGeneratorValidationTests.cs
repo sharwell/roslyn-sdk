@@ -133,6 +133,52 @@ namespace Microsoft.CodeAnalysis.Testing
             }.RunAsync();
         }
 
+        [Fact]
+        public async Task AddSimpleFileTestingByGeneratedSources()
+        {
+            await new CSharpSourceGeneratorTest<AddEmptyFile>
+            {
+                TestState =
+                {
+                    Sources =
+                    {
+                        @"// Comment",
+                    },
+                },
+                GeneratedSources =
+                {
+                    (typeof(AddEmptyFile), "EmptyGeneratedFile.cs", string.Empty),
+                },
+            }.RunAsync();
+        }
+
+        [Fact]
+        public async Task AddSimpleFileTestingByGeneratedSourcesWithDiagnostic()
+        {
+            await new CSharpSourceGeneratorTest<AddEmptyFileWithDiagnostic>
+            {
+                TestState =
+                {
+                    Sources =
+                    {
+                        @"{|#0:|}// Comment",
+                    },
+                },
+                FixedState =
+                {
+                    ExpectedDiagnostics =
+                    {
+                        // /0/Test0.cs(1,1): warning SG0001: Message
+                        new DiagnosticResult(AddEmptyFileWithDiagnostic.Descriptor).WithLocation(0),
+                    },
+                },
+                GeneratedSources =
+                {
+                    (typeof(AddEmptyFileWithDiagnostic), "EmptyGeneratedFile.cs", string.Empty),
+                },
+            }.RunAsync();
+        }
+
         private class CSharpSourceGeneratorTest<TSourceGenerator> : SourceGeneratorTest<DefaultVerifier>
             where TSourceGenerator : ISourceGenerator, new()
         {
